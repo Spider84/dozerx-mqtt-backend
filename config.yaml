@@ -1,0 +1,22 @@
+mqtt:
+  broker: "mqtt.spider.vc"
+  port: 1883
+  user: "spider"
+  password: "Muzka113162!"
+
+rest:
+  host: "0.0.0.0"
+  port: 8021
+
+auth:
+  username: "admin"
+  password: "admin123"
+
+database:
+  filename: "dozerx.db"
+
+timeouts:
+  http_request: 30
+  database: 20
+  mqtt: 60
+  scheduler: 30
