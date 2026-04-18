@@ -103,8 +103,9 @@ async def health_check(request: Request):
     try:
         # Check database connection
         from database import SessionLocal
+        from sqlalchemy import text
         db = SessionLocal()
-        db.execute("SELECT 1")
+        db.execute(text("SELECT 1"))
         db.close()
         
         # Get git information
