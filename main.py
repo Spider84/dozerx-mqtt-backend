@@ -18,6 +18,7 @@ from slowapi import _rate_limit_exceeded_handler
 from slowapi.errors import RateLimitExceeded
 from rate_limiter import limiter, RATE_LIMITS
 from git_info import get_version_string
+from systemd_notify import sd_ready, sd_status, sd_stopping, is_systemd_notify_available
 
 logger = setup_logger(__name__)
 
@@ -41,18 +42,38 @@ async def lifespan(app: FastAPI):
     version_info = get_version_string()
     logger.info(f"Starting DozerX Modular Service v1.0.0{version_info}")
     
+    # Notify systemd that we're starting (if available)
+    if is_systemd_notify_available():
+        sd_status("Initializing...")
+    
     # Run database migrations
     try:
+        if is_systemd_notify_available():
+            sd_status("Running database migrations...")
         run_migrations()
     except Exception as e:
         logger.error(f"Database migration failed: {e}")
         raise
     
+    if is_systemd_notify_available():
+        sd_status("Starting MQTT and scheduler...")
+    
     start_mqtt()
     start_scheduler()
     logger.info("DozerX Modular Service started successfully")
+    
+    # Notify systemd that we're ready
+    if is_systemd_notify_available():
+        sd_ready()
+        sd_status("Running")
+    
     yield
     logger.info("Shutting down DozerX Modular Service...")
+    
+    # Notify systemd that we're stopping
+    if is_systemd_notify_available():
+        sd_stopping()
+    
     stop_scheduler()
     stop_mqtt()
     logger.info("DozerX Modular Service stopped")

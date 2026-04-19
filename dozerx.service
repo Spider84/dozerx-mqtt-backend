@@ -1,0 +1,26 @@
+[Unit]
+Description=DozerX Modular Service - IoT Device Management
+After=network.target
+
+[Service]
+Type=notify
+NotifyAccess=all
+User=www-data
+Group=www-data
+WorkingDirectory=/path/to/dozerx
+Environment="PATH=/path/to/dozerx/venv/bin"
+ExecStart=/path/to/dozerx/venv/bin/python main.py
+Restart=always
+RestartSec=10
+
+# Logging
+StandardOutput=journal
+StandardError=journal
+SyslogIdentifier=dozerx-service
+
+# Security
+NoNewPrivileges=true
+PrivateTmp=true
+
+[Install]
+WantedBy=multi-user.target
