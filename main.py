@@ -1,10 +1,19 @@
-from fastapi import FastAPI, Security, Request
-from fastapi.security import APIKeyHeader
-from fastapi.staticfiles import StaticFiles
-from fastapi.responses import HTMLResponse
-from fastapi.middleware.cors import CORSMiddleware
+"""
+Main entry point for DozerX Modular Service.
+
+This module initializes the FastAPI application with all routers,
+middleware, and lifecycle management for MQTT and scheduler services.
+"""
 from contextlib import asynccontextmanager
 from datetime import datetime
+from fastapi import FastAPI, Request
+from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import HTMLResponse
+from fastapi.security import APIKeyHeader
+from fastapi.staticfiles import StaticFiles
+from slowapi import _rate_limit_exceeded_handler
+from slowapi.errors import RateLimitExceeded
+from sqlalchemy.exc import SQLAlchemyError
 from logger_config import setup_logger
 import models
 from database import engine
@@ -14,8 +23,6 @@ from scheduler_app import start_scheduler, stop_scheduler
 from config import config
 from api_key_headers_middleware import APIKeyHeadersMiddleware
 from migrations import run_migrations
-from slowapi import _rate_limit_exceeded_handler
-from slowapi.errors import RateLimitExceeded
 from rate_limiter import limiter, RATE_LIMITS
 from git_info import get_version_string
 from systemd_notify import sd_ready, sd_status, sd_stopping, is_systemd_notify_available
@@ -28,7 +35,7 @@ models.Base.metadata.create_all(bind=engine)
 api_key_scheme = APIKeyHeader(name="X-API-Key", description="API Key for authentication")
 
 @asynccontextmanager
-async def lifespan(app: FastAPI):
+async def lifespan(app: FastAPI):  # pylint: disable=unused-argument,redefined-outer-name
     """
     Context manager for the lifespan of the FastAPI application.
 
@@ -40,46 +47,46 @@ async def lifespan(app: FastAPI):
 
     """
     version_info = get_version_string()
-    logger.info(f"Starting DozerX Modular Service v1.0.0{version_info}")
-    
+    logger.info("Starting DozerX Modular Service v1.0.0%s", version_info)
+
     # Notify systemd that we're starting (if available)
     if is_systemd_notify_available():
         sd_status("Initializing...")
-    
+
     # Run database migrations
     try:
         if is_systemd_notify_available():
             sd_status("Running database migrations...")
         run_migrations()
-    except Exception as e:
-        logger.error(f"Database migration failed: {e}")
+    except SQLAlchemyError as e:
+        logger.error("Database migration failed: %s", e)
         raise
-    
+
     if is_systemd_notify_available():
         sd_status("Starting MQTT and scheduler...")
-    
+
     start_mqtt()
     start_scheduler()
     logger.info("DozerX Modular Service started successfully")
-    
+
     # Notify systemd that we're ready
     if is_systemd_notify_available():
         sd_ready()
         sd_status("Running")
-    
+
     yield
     logger.info("Shutting down DozerX Modular Service...")
-    
+
     # Notify systemd that we're stopping
     if is_systemd_notify_available():
         sd_stopping()
-    
+
     stop_scheduler()
     stop_mqtt()
     logger.info("DozerX Modular Service stopped")
 
 app = FastAPI(
-    title="DozerX Modular Service", 
+    title="DozerX Modular Service",
     lifespan=lifespan,
     description="IoT Device Management Service with MQTT integration",
     version="1.0.0"
@@ -119,31 +126,33 @@ app.mount("/static", StaticFiles(directory="static"), name="static")
 
 @app.get("/health", summary="Health check", description="Check service health status")
 @limiter.limit(RATE_LIMITS["health"])  # Health check can be called frequently
-async def health_check(request: Request):
+async def health_check(request: Request):  # pylint: disable=unused-argument
     """Health check endpoint for monitoring"""
     try:
         # Check database connection
-        from database import SessionLocal
-        from sqlalchemy import text
+        from database import SessionLocal  # pylint: disable=import-outside-toplevel
+        from sqlalchemy import text  # pylint: disable=import-outside-toplevel
         db = SessionLocal()
-        db.execute(text("SELECT 1"))
-        db.close()
-        
+        try:
+            db.execute(text("SELECT 1"))
+        finally:
+            db.close()
+
         # Get git information
         git_info = get_version_string()
-        
+
         return {
             "status": "healthy",
             "timestamp": datetime.utcnow().isoformat(),
             "version": f"1.0.0{git_info}",
             "services": {
                 "database": "connected",
-                "mqtt": "running",  # Could add actual MQTT status check
+                "mqtt": "running",
                 "scheduler": "running"
             }
         }
-    except Exception as e:
-        logger.error(f"Health check failed: {e}")
+    except SQLAlchemyError as e:
+        logger.error("Health check failed: %s", e)
         return {
             "status": "unhealthy",
             "timestamp": datetime.utcnow().isoformat(),
@@ -179,18 +188,14 @@ app.include_router(tasks.router)
 app.include_router(scheduler.router)
 
 if __name__ == "__main__":
-    """
-    Entry point for running the FastAPI application.
-
-    This function starts the FastAPI application using uvicorn.
-
-    """
+    # Entry point for running the FastAPI application.
+    # This function starts the FastAPI application using uvicorn.
     import uvicorn
-    logger.info(f"Starting FastAPI server on {config['rest']['host']}:{config['rest']['port']}")
+    logger.info("Starting FastAPI server on %s:%s",
+               config['rest']['host'], config['rest']['port'])
     uvicorn.run(
-        "main:app", 
-        host=config['rest']['host'], 
+        "main:app",
+        host=config['rest']['host'],
         port=config['rest']['port'],
-        server_header=False,  # Disable Server header
-        access_log=False      # Disable access logs for cleaner output
+        server_header=False,
     )

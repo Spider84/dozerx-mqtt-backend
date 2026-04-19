@@ -9,7 +9,7 @@ logger = setup_logger(__name__)
 def get_git_info():
     """
     Get git commit hash and branch name if available.
-    
+
     Returns:
         dict: Dictionary with 'commit' and 'branch' keys, None if git not available
     """
@@ -19,19 +19,21 @@ def get_git_info():
             ["git", "rev-parse", "--short", "HEAD"],
             capture_output=True,
             text=True,
-            timeout=2
+            timeout=2,
+            check=False
         )
         commit_hash = commit.stdout.strip() if commit.returncode == 0 else None
-        
+
         # Get branch name
         branch = subprocess.run(
             ["git", "rev-parse", "--abbrev-ref", "HEAD"],
             capture_output=True,
             text=True,
-            timeout=2
+            timeout=2,
+            check=False
         )
         branch_name = branch.stdout.strip() if branch.returncode == 0 else None
-        
+
         if commit_hash or branch_name:
             return {
                 "commit": commit_hash,
@@ -44,14 +46,13 @@ def get_git_info():
     except subprocess.TimeoutExpired:
         logger.debug("Git command timeout")
         return None
-    except Exception as e:
-        logger.debug(f"Error getting git info: {e}")
+    except (subprocess.SubprocessError, OSError) as e:
+        logger.debug("Error getting git info: %s", e)
         return None
 
 def get_version_string():
     """
     Get formatted version string with git information.
-    
     Returns:
         str: Version string with git info if available
     """
