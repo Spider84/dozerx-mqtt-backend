@@ -1,0 +1,28 @@
+version: '3.8'
+
+services:
+  dozerx-service:
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile
+    container_name: dozerx-service
+    ports:
+      - "8021:8021"
+    environment:
+      - PYTHONUNBUFFERED=1
+    volumes:
+      - ../config.yaml:/app/config.yaml:ro
+      - ../dozerx.db:/app/dozerx.db
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "python", "-c", "import requests; requests.get('http://localhost:8021/health')"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    networks:
+      - dozerx-network
+
+networks:
+  dozerx-network:
+    driver: bridge

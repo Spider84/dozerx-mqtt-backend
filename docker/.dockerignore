@@ -1,0 +1,45 @@
+# Git
+.git
+.gitignore
+
+# Python
+__pycache__
+*.py[cod]
+*$py.class
+*.so
+.Python
+venv/
+env/
+ENV/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Logs
+*.log
+
+# Database
+*.db
+*.sqlite
+*.sqlite3
+
+# Environment
+.env
+.env.local
+
+# Documentation
+README.md
+docs/
+
+# Docker folder (exclude itself from build context)
+docker/
+
+# Systemd
+dozerx.service
+systemd_notify.py
+
+# Nginx
+dozerx.spider.vc.conf
