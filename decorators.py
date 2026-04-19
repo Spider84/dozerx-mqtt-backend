@@ -1,8 +1,13 @@
-from functools import wraps
+"""
+Decorator utilities for FastAPI endpoints.
+
+This module provides decorators for validating MAC address parameters
+and other common endpoint validation tasks.
+"""
+import re
+from functools import lru_cache, wraps
 from fastapi import HTTPException
 from logger_config import setup_logger
-import re
-from functools import lru_cache
 
 logger = setup_logger(__name__)
 
@@ -14,10 +19,10 @@ def get_mac_pattern():
 def validate_mac_address(mac: str) -> bool:
     """
     Validate MAC address format.
-    
+
     Args:
         mac: MAC address string
-        
+
     Returns:
         True if valid, False otherwise
     """
@@ -29,16 +34,16 @@ def validate_mac_address(mac: str) -> bool:
 def validate_mac_param(param_name: str = "mac"):
     """
     Decorator to validate MAC address parameters in FastAPI endpoints.
-    
+
     Args:
         param_name: Name of the parameter to validate (default: "mac")
-        
+
     Usage:
         @validate_mac_param()
         def get_device(mac: str, db: Session = Depends(get_db)):
             # mac is already validated
             pass
-            
+
         @validate_mac_param("device_mac")
         def get_task(device_mac: str, db: Session = Depends(get_db)):
             # device_mac is already validated
@@ -49,14 +54,14 @@ def validate_mac_param(param_name: str = "mac"):
         def wrapper(*args, **kwargs):
             # Get the MAC address from kwargs
             mac_value = kwargs.get(param_name)
-            
+
             if mac_value and not validate_mac_address(mac_value):
-                logger.warning(f"Invalid MAC address format: {mac_value}")
+                logger.warning("Invalid MAC address format: %s", mac_value)
                 raise HTTPException(
-                    status_code=400, 
+                    status_code=400,
                     detail=f"Invalid MAC address format: {param_name}"
                 )
-            
+
             return func(*args, **kwargs)
         return wrapper
     return decorator
