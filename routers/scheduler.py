@@ -90,6 +90,6 @@ async def run_task_manually(
     except SQLAlchemyError as e:
         logger.error("API error: Failed to execute task %s: %s", task_id, e)
         raise HTTPException(
-            status_code=500, 
+            status_code=500,
             detail=f"Failed to execute task {task_id}: {str(e)}"
         ) from e

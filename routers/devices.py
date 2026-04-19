@@ -348,7 +348,7 @@ def has_device_changes(db_device: models.DBDevice, update_data: dict) -> bool:
             continue
         if current_value is None or new_value is None:
             return True
-        elif current_value != new_value:
+        if current_value != new_value:
             logger.debug("Field %s changed: %s -> %s", field, current_value, new_value)
             return True
 
@@ -364,6 +364,7 @@ def has_device_changes(db_device: models.DBDevice, update_data: dict) -> bool:
 def get_device_history(  # pylint: disable=too-many-arguments
     request: Request,  # pylint: disable=unused-argument
     mac: str,
+    *,
     limit: int = Query(default=100, le=1000, ge=1),
     offset: int = Query(default=0, ge=0),
     event_type: str = None,
