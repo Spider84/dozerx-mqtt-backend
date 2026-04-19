@@ -97,7 +97,7 @@ class DeviceCreate(BaseModel):
     cons: Optional[ConsInfo] = None
 
     @validator('mac')
-    def validate_mac(cls, v):
+    def validate_mac(cls, v):  # pylint: disable=no-self-argument
         """
         Validate MAC address format.
 

@@ -13,7 +13,7 @@ from logger_config import setup_logger
 
 logger = setup_logger(__name__)
 
-def process_mqtt_message(topic, payload):
+def process_mqtt_message(topic, payload):  # pylint: disable=too-many-locals,too-many-branches,too-many-statements
     """
     Process MQTT message and update device state.
 
@@ -77,7 +77,6 @@ def process_mqtt_message(topic, payload):
                     device.global_total_duration = max(device.global_total_duration, new_dur)
                     updated_fields.append("duration")
 
-                buttons_updated = False
                 for btn in data.get("buttons", []):
                     num = btn.get("num")
                     val = btn.get("cnt", 0)
@@ -95,7 +94,6 @@ def process_mqtt_message(topic, payload):
                         if val != current_cnt:
                             setattr(device, btn_cnt_attr, val)
                             setattr(device, global_btn_attr, max(current_global, val))
-                            buttons_updated = True
                             updated_fields.append(f"btn{num}_cnt")
                             device.total_cnt += 1
                             device.global_total_cnt += 1
@@ -159,12 +157,12 @@ if config['mqtt'].get('user'):
     mqtt_client.username_pw_set(config['mqtt']['user'], config['mqtt'].get('password'))
 
 @mqtt_client.connect_callback()
-def on_connect(client, userdata, flags, rc, prop=None):
+def on_connect(_client, _userdata, _flags, _rc, _prop=None):
     """MQTT connection callback - subscribe to dozerx topics"""
-    client.subscribe("dozerx/#")
+    mqtt_client.subscribe("dozerx/#")
 
 @mqtt_client.message_callback()
-def on_message(client, userdata, msg):
+def on_message(_client, _userdata, msg):
     """
     MQTT message callback - process incoming messages.
 

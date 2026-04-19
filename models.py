@@ -12,7 +12,7 @@ from logger_config import setup_logger
 
 logger = setup_logger(__name__)
 
-class DBClient(Base):
+class DBClient(Base):  # pylint: disable=too-few-public-methods
     """Client model for representing client organizations."""
 
     __tablename__ = "clients"
@@ -20,7 +20,7 @@ class DBClient(Base):
     name = Column(String, index=True)
     devices = relationship("DBDevice", back_populates="client")
 
-class DBDevice(Base):
+class DBDevice(Base):  # pylint: disable=too-few-public-methods
     """Device model for IoT device information and settings."""
 
     __tablename__ = "devices"
@@ -76,7 +76,7 @@ class DBDevice(Base):
     client = relationship("DBClient", back_populates="devices")
     tasks = relationship("DBTask", back_populates="device", cascade="all, delete-orphan")
 
-class DBHistory(Base):
+class DBHistory(Base):  # pylint: disable=too-few-public-methods
     """History model for MQTT message history."""
 
     __tablename__ = "history"
@@ -86,7 +86,7 @@ class DBHistory(Base):
     event_type = Column(String, index=True)
     event_data = Column(String)
 
-class DBTask(Base):
+class DBTask(Base):  # pylint: disable=too-few-public-methods
     """Task model for scheduled device tasks."""
 
     __tablename__ = "tasks"
@@ -98,7 +98,7 @@ class DBTask(Base):
     reset_flag = Column(Boolean, default=False)
     device = relationship("DBDevice", back_populates="tasks")
 
-class DBApiKey(Base):
+class DBApiKey(Base):  # pylint: disable=too-few-public-methods
     """API key model for authentication."""
 
     __tablename__ = "api_keys"

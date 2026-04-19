@@ -8,7 +8,7 @@ from logger_config import setup_logger
 
 logger = setup_logger(__name__)
 
-class RemoveServerHeaderASGIMiddleware:
+class RemoveServerHeaderASGIMiddleware:  # pylint: disable=too-few-public-methods
     """
     ASGI middleware to remove Server header from HTTP responses.
 

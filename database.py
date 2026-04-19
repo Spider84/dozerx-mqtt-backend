@@ -27,7 +27,7 @@ engine = create_engine(
     echo=False
 )
 
-SessionLocal = sessionmaker(
+SessionLocal = sessionmaker(  # pylint: disable=invalid-name
     autocommit=False,
     autoflush=False,
     bind=engine,

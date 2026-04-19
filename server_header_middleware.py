@@ -11,7 +11,7 @@ from logger_config import setup_logger
 logger = setup_logger(__name__)
 
 
-class RemoveServerHeaderMiddleware(BaseHTTPMiddleware):
+class RemoveServerHeaderMiddleware(BaseHTTPMiddleware):  # pylint: disable=too-few-public-methods
     """
     Middleware to remove Server header from HTTP responses.
 

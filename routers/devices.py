@@ -108,7 +108,7 @@ def convert_device_create_to_db(device: schemas.DeviceCreate) -> dict:
 
     return db_data
 
-def convert_device_update_to_db(device: schemas.DeviceUpdate) -> dict:
+def convert_device_update_to_db(device: schemas.DeviceUpdate) -> dict:  # pylint: disable=too-many-branches
     """
     Convert grouped DeviceUpdate schema to flat database fields.
 
@@ -346,7 +346,7 @@ def has_device_changes(db_device: models.DBDevice, update_data: dict) -> bool:
         # Handle None values properly
         if current_value is None and new_value is None:
             continue
-        elif current_value is None or new_value is None:
+        if current_value is None or new_value is None:
             return True
         elif current_value != new_value:
             logger.debug("Field %s changed: %s -> %s", field, current_value, new_value)
@@ -361,7 +361,7 @@ def has_device_changes(db_device: models.DBDevice, update_data: dict) -> bool:
 )
 @validate_mac_param()
 @limiter.limit(RATE_LIMITS["read"])  # Read operations
-def get_device_history(
+def get_device_history(  # pylint: disable=too-many-arguments
     request: Request,  # pylint: disable=unused-argument
     mac: str,
     limit: int = Query(default=100, le=1000, ge=1),

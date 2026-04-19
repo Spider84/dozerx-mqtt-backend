@@ -93,7 +93,7 @@ def format_time_until_next_run(seconds: int) -> str:
         return f"{days} days {time_str}"
     return time_str
 
-def execute_cron_task(task_id: int):
+def execute_cron_task(task_id: int):  # pylint: disable=too-many-statements
     """
     Execute a scheduled cron task for a device.
 

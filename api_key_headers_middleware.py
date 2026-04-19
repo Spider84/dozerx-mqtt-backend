@@ -11,7 +11,7 @@ from logger_config import setup_logger
 
 logger = setup_logger(__name__)
 
-class APIKeyHeadersMiddleware(BaseHTTPMiddleware):
+class APIKeyHeadersMiddleware(BaseHTTPMiddleware):  # pylint: disable=too-few-public-methods
     """
     Middleware to add API key information to response headers.
 

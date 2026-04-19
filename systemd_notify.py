@@ -60,7 +60,7 @@ if sys.platform != 'win32':
         return os.environ.get('NOTIFY_SOCKET') is not None
 else:
     # Stub functions for Windows
-    def sd_notify(state):
+    def sd_notify(_state):
         """Systemd notify not available on Windows."""
         return False
 
@@ -68,7 +68,7 @@ else:
         """Systemd notify not available on Windows."""
         return False
 
-    def sd_status(status):
+    def sd_status(_status):
         """Systemd notify not available on Windows."""
         return False
 

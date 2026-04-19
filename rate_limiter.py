@@ -6,7 +6,6 @@ configurations for use across all application routers.
 """
 from slowapi import Limiter
 from slowapi.util import get_remote_address
-from slowapi.errors import RateLimitExceeded
 
 # Create global limiter instance for all routers
 limiter = Limiter(key_func=get_remote_address)

@@ -3,6 +3,7 @@ Database migration system for SQLite.
 Handles version tracking and automatic schema migrations using PRAGMA user_version.
 """
 from sqlalchemy import text
+from sqlalchemy.exc import SQLAlchemyError
 from database import engine
 from logger_config import setup_logger
 
@@ -23,7 +24,7 @@ def get_current_db_version():
             result = conn.execute(text("PRAGMA user_version"))
             row = result.fetchone()
             return row[0] if row else 0
-    except (sqlalchemy.exc.SQLAlchemyError, OSError) as e:
+    except (SQLAlchemyError, OSError) as e:
         logger.error("Error getting database version: %s", e)
         return 0
 
@@ -39,7 +40,7 @@ def set_db_version(version):
             conn.execute(text(f"PRAGMA user_version = {version}"))
             conn.commit()
             logger.info("Database version set to %s", version)
-    except (sqlalchemy.exc.SQLAlchemyError, OSError) as e:
+    except (SQLAlchemyError, OSError) as e:
         logger.error("Error setting database version: %s", e)
         raise
 
@@ -55,7 +56,7 @@ def migrate_to_v1():
             conn.commit()
 
             logger.info("Migration to version 1 completed successfully")
-    except (sqlalchemy.exc.SQLAlchemyError, OSError) as e:
+    except (SQLAlchemyError, OSError) as e:
         logger.error("Error during migration to v1: %s", e)
         raise
 
@@ -96,11 +97,11 @@ def run_migrations():
             else:
                 logger.error("Migration function for version %s not found",
                             version)
-                raise RuntimeError("Migration to version %s not implemented" % version)
+                raise RuntimeError(f"Migration to version {version} not implemented")
 
         logger.info("All migrations completed successfully")
 
-    except (sqlalchemy.exc.SQLAlchemyError, OSError, RuntimeError) as e:
+    except (SQLAlchemyError, OSError, RuntimeError) as e:
         logger.error("Migration failed: %s", e)
         raise
 

@@ -35,7 +35,7 @@ models.Base.metadata.create_all(bind=engine)
 api_key_scheme = APIKeyHeader(name="X-API-Key", description="API Key for authentication")
 
 @asynccontextmanager
-async def lifespan(app: FastAPI):
+async def lifespan(app: FastAPI):  # pylint: disable=unused-argument,redefined-outer-name
     """
     Context manager for the lifespan of the FastAPI application.
 
@@ -126,12 +126,12 @@ app.mount("/static", StaticFiles(directory="static"), name="static")
 
 @app.get("/health", summary="Health check", description="Check service health status")
 @limiter.limit(RATE_LIMITS["health"])  # Health check can be called frequently
-async def health_check(request: Request):
+async def health_check(request: Request):  # pylint: disable=unused-argument
     """Health check endpoint for monitoring"""
     try:
         # Check database connection
-        from database import SessionLocal
-        from sqlalchemy import text
+        from database import SessionLocal  # pylint: disable=import-outside-toplevel
+        from sqlalchemy import text  # pylint: disable=import-outside-toplevel
         db = SessionLocal()
         try:
             db.execute(text("SELECT 1"))
@@ -188,11 +188,8 @@ app.include_router(tasks.router)
 app.include_router(scheduler.router)
 
 if __name__ == "__main__":
-    """
-    Entry point for running the FastAPI application.
-
-    This function starts the FastAPI application using uvicorn.
-    """
+    # Entry point for running the FastAPI application.
+    # This function starts the FastAPI application using uvicorn.
     import uvicorn
     logger.info("Starting FastAPI server on %s:%s",
                config['rest']['host'], config['rest']['port'])
