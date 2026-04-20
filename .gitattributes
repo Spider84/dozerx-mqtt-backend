@@ -1,0 +1,10 @@
+# Mark all project files as linguist-generated
+*.py linguist-generated=true
+*.yaml linguist-generated=true
+*.yml linguist-generated=true
+*.txt linguist-generated=true
+*.service linguist-generated=true
+*.conf linguist-generated=true
+*.js linguist-generated=true
+*.html linguist-generated=true
+Dockerfile linguist-generated=true
